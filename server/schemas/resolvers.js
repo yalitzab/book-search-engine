@@ -10,9 +10,9 @@ const resolvers = {
 
                 return userData;
             }
-
             throw new AuthenticationError('Not logged in');
         },
+
         // get a user by username
         user: async (parent, { username }) => {
             return User.findOne({ username })
@@ -22,12 +22,14 @@ const resolvers = {
     },
 
     Mutation: {
+
         addUser: async (parent, args) => {
             const user = await User.create(args);
             const token = signToken(user);
 
             return { token, user };
         },
+
         login: async (parent, { email, password }) => {
             const user = await User.findOne({ email });
 
@@ -53,27 +55,20 @@ const resolvers = {
                 { $push: { saveBook: book } },
                 { new: true }
             );
-
             return book;
-
         },
 
         removeBook: async (parent, { bookId }, context) => {
             if (context.user) {
                 const book = await Book.deleteOne(
                     { bookId: bookId },
-
                     { new: true }
                 )
-
                 return book;
             }
-
-            throw new AuthenticationError('You need to be logged in!');
+            throw new AuthenticationError('Book has been removed');
         }
     }
-
-
 };
 
 module.exports = resolvers;
