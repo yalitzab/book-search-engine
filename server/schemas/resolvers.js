@@ -1,4 +1,6 @@
-const { User, Thought } = require('../models');
+const { User } = require('../models');
+const { AuthenticationError } = require('apollo-server-express');
+const { signToken } = require('../utils/auth');
 
 const resolvers = {
     Query: {
@@ -6,7 +8,6 @@ const resolvers = {
             if (context.user) {
                 const userData = await User.findOne({ _id: context.user._id })
                     .select('-__v -password')
-                    .populate('saveBooks');
 
                 return userData;
             }
@@ -52,10 +53,10 @@ const resolvers = {
 
             await User.findByIdAndUpdate(
                 { _id: context.user._id },
-                { $push: { saveBook: book } },
+                { $pull: { saveBook: bookId } },
                 { new: true }
             );
-            return book;
+            return updatedUser;
         },
 
         removeBook: async (parent, { bookId }, context) => {
